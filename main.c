@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
         
    }
    
-   ALLEGRO_BITMAP arreglo_de_bitmaps[CANT_LEDS];    //creo un arreglo de LEDS
+   ALLEGRO_BITMAP * arreglo_de_bitmaps[CANT_LEDS];    //creo un arreglo de LEDS
    
    int contador_bitmap;
    
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
    al_register_event_source(maneja_evento,al_get_mouse_event_source());
    al_register_event_source(maneja_evento,al_get_display_event_source(display));
    
-  
+   al_rest(10);
    
    
    
