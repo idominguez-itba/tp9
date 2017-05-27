@@ -21,20 +21,20 @@
 #include <allegro5/bitmap.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/display.h>
+#include <allegro5/drawing.h>
+#include <allegro5/allegro_color.h>
+#include <stdbool.h>
 
-
-#define CANT_LEDS   16
-
-#define ANCHO_DIS   640
-#define ALTO_DIS    480
-
-
+#include "datos_generales.h"
+#include "manejo_led.h"
 
 /*
  * 
  */
 int main(int argc, char** argv) {
-
+    
+    bool control = true;
+    
    if(!al_init())  //instalo (si puedo) allegro
    {
        printf( "Fallo al inicializar allegro");
@@ -71,32 +71,33 @@ int main(int argc, char** argv) {
         
    }
    
-   ALLEGRO_BITMAP * arreglo_de_bitmaps[CANT_LEDS];    //creo un arreglo de LEDS
+   ALLEGRO_BITMAP * puertoA[CANT_LEDS_PUERTO];    //creo puerto A
+   ALLEGRO_BITMAP * puertoB[CANT_LEDS_PUERTO];  //creo puerto B
+   
+   ALLEGRO_BITMAP * puertoD[CANT_LEDS_D];
+   
+   
    
    int contador_bitmap;
    
-   for (contador_bitmap = 0; contador_bitmap < CANT_LEDS; contador_bitmap++) //verifico que se hayan creado correctamente los LEDS
+   //hago que el puertoD este conformado por el puertoA y el puertoB
+   for(contador_bitmap=0;contador_bitmap<CANT_LEDS_D;contador_bitmap++) 
    {
-     
-       if (!arreglo_de_bitmaps[contador_bitmap])
+       if(contador_bitmap<CANT_LEDS_PUERTO)
        {
-           int contador_error;
-           
-           for (contador_error = 0; contador_error <= contador_bitmap; contador_error++)
-           {
-               al_destroy_bitmap(arreglo_de_bitmaps[contador_error]);
-
-           }
-           
-           al_destroy_event_queue(maneja_evento);
-           
-           return -1;
-        }
-
+           puertoD[contador_bitmap]=puertoB[contador_bitmap];
+       
+       } else
+       {
+           puertoD[contador_bitmap]=puertoA[contador_bitmap-CANT_LEDS_PUERTO];
+      
+       }
+       
+       
    }
    
-   ALLEGRO_DISPLAY * display = NULL;
    
+   ALLEGRO_DISPLAY * display = NULL;
    display = al_create_display(ANCHO_DIS,ALTO_DIS); //creo el display
    
    if (!display)    //verifico que se haya creado correctamente el display
@@ -105,24 +106,63 @@ int main(int argc, char** argv) {
        
        al_destroy_event_queue(maneja_evento);
        
-       for(contador_bitmap=0;contador_bitmap<CANT_LEDS;contador_bitmap++)
-       {
-           al_destroy_bitmap(arreglo_de_bitmaps[contador_bitmap]);
-       }
+       al_destroy_display(display);
        
        return -1;
        
        
    }
 
-                                                                            //registro los eventos
+   al_clear_to_color(al_color_name("blue"));
+   control = crear_puertoD(display, puertoD);
+   al_flip_display();
+   
+   if(control==false)
+   {
+       
+   
+        for (contador_bitmap = 0; contador_bitmap < CANT_LEDS_D; contador_bitmap++) //verifico que se hayan creado correctamente los LEDS
+        {
+            al_destroy_bitmap(puertoD[contador_bitmap]);
+                
+        }
+        
+        al_destroy_event_queue(maneja_evento);
+        al_destroy_display(display);
+        
+        return -1;
+    }
+   
+   
+   
+   al_flip_display();
+   
+   //registro los eventos
    al_register_event_source(maneja_evento,al_get_keyboard_event_source());
    al_register_event_source(maneja_evento,al_get_mouse_event_source());
    al_register_event_source(maneja_evento,al_get_display_event_source(display));
    
-   al_rest(10);
    
    
+   cambiar_estado_led(display, puertoD, 0, 4, true);
+   al_flip_display();
+   al_rest(5.0);
+   cambiar_estado_led(display, puertoD, 1, 0, true);
+   al_flip_display();
+   al_rest(5.0);
+   cambiar_estado_led(display, puertoD ,1, 6, true);
+   al_flip_display();
+   al_rest(5.0);
+   
+   
+  //destruyo todo lo que cree
+   al_destroy_event_queue(maneja_evento);
+   
+   for(contador_bitmap=0;contador_bitmap<CANT_LEDS_D;contador_bitmap++)
+   {
+       al_destroy_bitmap(puertoD[contador_bitmap]);
+   }
+   al_destroy_display(display);
    
    
    
