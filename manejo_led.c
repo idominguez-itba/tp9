@@ -11,6 +11,8 @@
 
 #include "datos_generales.h"
 #include "manejo_led.h"
+#include "manejo_estruct.h"
+
 #define ANCHO_LED  25
 #define ALTO_LED    50
 
@@ -92,47 +94,94 @@ bool crear_puertoD(ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * puerto[])
 
 
 
-bool cambiar_estado_led (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * puerto [], int nro_puerto,
-        int nro_led, bool estado)
+bool cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * puerto [], dos_byte_t datos)
 {
            
-    ALLEGRO_BITMAP * led = puerto[nro_puerto*CANT_LEDS_PUERTO + nro_led];
+   
     
     bool control = true;
     
-    float posx = calc_posx_led(nro_led,CANT_LEDS_PUERTO);
-    float posy = calc_posy_led(nro_puerto,CANT_PUERTOS_AUX);
+    char estado;
+    
+    int cont_puerto;
+    int cont_leds;
     
     
-    led = al_create_bitmap(ANCHO_LED,ALTO_LED);
+    ALLEGRO_BITMAP *prendido = NULL;
+    ALLEGRO_BITMAP *apagado = NULL;
     
-    if(!led)
+    prendido = al_create_bitmap(ANCHO_LED,ALTO_LED);
+    apagado = al_create_bitmap(ANCHO_LED,ALTO_LED);
+    
+    if((!prendido)&&(!apagado))
     {
         control = false;
+        al_destroy_bitmap(prendido);
+        al_destroy_bitmap(apagado);
         
-    } else
+    }else
     {
-        al_set_target_bitmap(led);
-   
-        if(estado==true)
+        //ALLEGRO_COLOR * fondo_color = al_get_pixel(al_get_backbuffer(display),0,0);
+        ALLEGRO_BITMAP * fondo = NULL;
+        fondo = al_create_bitmap(ANCHO_DIS,ALTO_LED);
+        
+        if(!fondo)
         {
-           al_clear_to_color(al_color_name(PRENDIDO));
+            control = false;
+            al_destroy_bitmap(prendido);
+            al_destroy_bitmap(apagado);
+            al_destroy_bitmap(fondo);
         } else
         {
-           al_clear_to_color(al_color_name(APAGADO));
+           // al_set_target_bitmap(fondo);
+          //  al_clear_to_color(fondo_color);
+            
+            al_set_target_bitmap(prendido);
+            al_clear_to_color(al_color_name(PRENDIDO));
+
+            al_set_target_bitmap(apagado);
+            al_clear_to_color(al_color_name(APAGADO));
+
+            al_set_target_backbuffer(display);
+
+            al_draw_bitmap(fondo,0,0,0);
+            
+            for(cont_puerto=0;cont_puerto<CANT_PUERTOS_AUX;cont_puerto++)
+            {
+                for(cont_leds=0;cont_leds<CANT_LEDS_PUERTO;cont_leds++)
+                {
+                    estado = bitGet(cont_puerto*CANT_LEDS_PUERTO+cont_leds,datos,D);
+                    float posx = calc_posx_led(cont_leds,CANT_LEDS_PUERTO);
+                    float posy = calc_posy_led(cont_puerto,CANT_PUERTOS_AUX);
+                    
+                    if(estado == ON)
+                    {
+                        al_draw_bitmap(prendido,posx,posy,0);
+                    } else
+                    {
+                        al_draw_bitmap(apagado,posx,posy,0);
+                    }
+                   
+                }
+            }
+            
+            al_flip_display();
+            al_destroy_bitmap(fondo);
+            al_destroy_bitmap(prendido);
+            al_destroy_bitmap(apagado);
+            
+            
         }
-    
-    
-        al_set_target_backbuffer(display);
-        al_draw_bitmap(led,posx,posy,0);
-        al_flip_display();
-     
+        
         
     }
+    
     
     return control;
     
 }   
+
+
 bool crear_led(ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP *led, float ancho, float alto, float posx, float posy)
 {
     
@@ -163,13 +212,14 @@ float calc_posx_led (int nro_led, int tamano_puerto)
 {
      float posx = ANCHO_DIS/2.0;
      if(nro_led<tamano_puerto/2)
-        {
-            posx-= ((tamano_puerto/2.0) -0.5 -nro_led)*SEPA_ENTRE_LEDS +(tamano_puerto/2.0 -nro_led)*ANCHO_LED; 
+        {   
+            int contador_aux =  tamano_puerto/2.0 - nro_led ;
+            posx+= (contador_aux -0.5)*SEPA_ENTRE_LEDS +(contador_aux -1)*ANCHO_LED; 
         
         } else
         {
             int contador_aux = nro_led - tamano_puerto/2.0;
-            posx+= ((tamano_puerto/2.0) +0.5 +contador_aux)*SEPA_ENTRE_LEDS +contador_aux*ANCHO_LED;
+            posx-= (0.5 +contador_aux)*SEPA_ENTRE_LEDS +(contador_aux+1)*ANCHO_LED;
             
         }
      
@@ -186,11 +236,12 @@ float calc_posy_led (int nro_puerto_aux, int tamano_puerto)
         
     if(nro_puerto_aux<tamano_puerto/2)
     {
-        posy-= ((tamano_puerto/2.0) -0.5 -nro_puerto_aux)*SEPA_PUERTOS_AUX +(tamano_puerto/2.0 -nro_puerto_aux)*ALTO_LED;
+        int contador_aux =  tamano_puerto/2.0 - nro_puerto_aux ;
+        posy+= (contador_aux - 0.5)*SEPA_PUERTOS_AUX +(contador_aux -1)*ALTO_LED;
     } else
     {
         int contador_aux = nro_puerto_aux - tamano_puerto/2;
-        posy+= ((tamano_puerto/2.0) +0.5 +contador_aux)*SEPA_PUERTOS_AUX +contador_aux*ALTO_LED;
+        posy-= (contador_aux +0.5)*SEPA_PUERTOS_AUX +(contador_aux+1)*ALTO_LED;
 
     }
     
