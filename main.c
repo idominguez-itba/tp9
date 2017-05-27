@@ -27,13 +27,25 @@
 
 #include "datos_generales.h"
 #include "manejo_led.h"
+#include "manejo_estruct.h"
 
 /*
  * 
  */
 int main(int argc, char** argv) {
     
+    
+    
     bool control = true;
+    
+    dos_byte_t puertoD;
+    
+    unsigned char reinicio = 0;
+    
+    puertoD.puertoA = reinicio;
+    
+    puertoD.puertoB = reinicio;
+    
     
    if(!al_init())  //instalo (si puedo) allegro
    {
@@ -71,10 +83,10 @@ int main(int argc, char** argv) {
         
    }
    
-   ALLEGRO_BITMAP * puertoA[CANT_LEDS_PUERTO];    //creo puerto A
-   ALLEGRO_BITMAP * puertoB[CANT_LEDS_PUERTO];  //creo puerto B
+   ALLEGRO_BITMAP * ledsA[CANT_LEDS_PUERTO];    //creo puerto A
+   ALLEGRO_BITMAP * ledsB[CANT_LEDS_PUERTO];  //creo puerto B
    
-   ALLEGRO_BITMAP * puertoD[CANT_LEDS_D];
+   ALLEGRO_BITMAP * ledsD[CANT_LEDS_D];
    
    
    
@@ -85,11 +97,11 @@ int main(int argc, char** argv) {
    {
        if(contador_bitmap<CANT_LEDS_PUERTO)
        {
-           puertoD[contador_bitmap]=puertoB[contador_bitmap];
+           ledsD[contador_bitmap]=ledsB[contador_bitmap];
        
        } else
        {
-           puertoD[contador_bitmap]=puertoA[contador_bitmap-CANT_LEDS_PUERTO];
+           ledsD[contador_bitmap]=ledsA[contador_bitmap-CANT_LEDS_PUERTO];
       
        }
        
@@ -113,8 +125,8 @@ int main(int argc, char** argv) {
        
    }
 
-   al_clear_to_color(al_color_name("blue"));
-   control = crear_puertoD(display, puertoD);
+
+   control = crear_puertoD(display, ledsD);
    al_flip_display();
    
    if(control==false)
@@ -123,7 +135,7 @@ int main(int argc, char** argv) {
    
         for (contador_bitmap = 0; contador_bitmap < CANT_LEDS_D; contador_bitmap++) //verifico que se hayan creado correctamente los LEDS
         {
-            al_destroy_bitmap(puertoD[contador_bitmap]);
+            al_destroy_bitmap(ledsD[contador_bitmap]);
                 
         }
         
@@ -143,14 +155,23 @@ int main(int argc, char** argv) {
    al_register_event_source(maneja_evento,al_get_display_event_source(display));
    
    
+   al_rest(5.0);
    
-   cambiar_estado_led(display, puertoD, 0, 4, true);
+   puertoD.puertoA=0x00;
+   puertoD.puertoB=0x01;
+   cambiar_estado_leds(display, ledsD, puertoD);
    al_flip_display();
    al_rest(5.0);
-   cambiar_estado_led(display, puertoD, 1, 0, true);
+   
+   puertoD.puertoA = 0x10;
+   puertoD.puertoB = 0x0A;
+   cambiar_estado_leds(display, ledsD, puertoD);
    al_flip_display();
    al_rest(5.0);
-   cambiar_estado_led(display, puertoD ,1, 6, true);
+   
+   puertoD.puertoA = 0x0B;
+   puertoD.puertoB = 0xF2;
+   cambiar_estado_leds(display, ledsD ,puertoD);
    al_flip_display();
    al_rest(5.0);
    
@@ -160,7 +181,7 @@ int main(int argc, char** argv) {
    
    for(contador_bitmap=0;contador_bitmap<CANT_LEDS_D;contador_bitmap++)
    {
-       al_destroy_bitmap(puertoD[contador_bitmap]);
+       al_destroy_bitmap(ledsD[contador_bitmap]);
    }
    al_destroy_display(display);
    
