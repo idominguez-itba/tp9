@@ -17,6 +17,9 @@
 #define ANCHO_DIS   640
 #define ALTO_DIS    480
 
+#define ANCHO_LED  25
+#define ALTO_LED    50
+
 #define CANT_PUERTOS_AUX 2
 #define CANT_LEDS_PUERTO 8
 #define CANT_LEDS_D 2*CANT_LEDS_PUERTO
