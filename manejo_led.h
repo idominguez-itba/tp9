@@ -16,17 +16,14 @@
 
 #include "manejo_estruct.h"
 
-bool crear_puertoD(ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * puerto[]);
-//creo la cantidad de LEDS que hay en el puerto (necesito el display donde va aparecer el puerto)
-//inicializa todos los leds APAGADOS
-//devuelve un bool en que si es true, significa que se pudo crear el puertoD correctamente; caso contrario, fallo
-//al crear el puertoD
 
-bool cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * puerto [],dos_byte_t datos);
+void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado, 
+        ALLEGRO_BITMAP * led_prendido, dos_byte_t datos, ALLEGRO_BITMAP * fondo);
 //se pasan como parametros el puerto y el estado de los leds en el puertoD
 //(necesito como argumento el display donde va a cambiar el led)
-//devuelve un bool en que si es true, significa que se pudo modificar todos los leds correctamente o false
-//si no se pudo modificar correctamente los leds del puertoD
+//(ademas necesito como argumento los leds prendido y apagado que dibujar en caso
+//de que el bit este prendido o apagado)
+
 
 #endif /* MANEJO_LED_H */
 
