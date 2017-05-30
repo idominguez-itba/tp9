@@ -25,5 +25,13 @@ void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado
 //de que el bit este prendido o apagado)
 
 
+int identificar_led (float coordenada_x, float coordenada_y);
+// recibe como parámetro dos coordenadas y 
+
+
+
+
+
+
 #endif /* MANEJO_LED_H */
 

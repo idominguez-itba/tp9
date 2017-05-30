@@ -317,7 +317,13 @@ void proceso(info_t *info, int *p_funcion, dos_byte_t *puertoD, int *contador)
 
 	if ((*p_funcion) == VACIO)
 	{
-		(*puertoD) = bitSet((info)-> bit, (*puertoD), (info)-> letra);
+            
+            switch (bitGet(info -> bit, (*puertoD), info -> letra))
+            {
+                case OFF: (*puertoD) = bitSet(info-> bit, (*puertoD), info-> letra); break;
+                case ON: (*puertoD) = bitClear(info-> bit, (*puertoD), info-> letra); break;
+            }
+		
 	}
 	else
 	{
@@ -330,6 +336,22 @@ void proceso(info_t *info, int *p_funcion, dos_byte_t *puertoD, int *contador)
 	}
 }
 
+
+
+void actualizar_puerto (info_t *info_leds, dos_byte_t *puertoD, int led_tocado, int *funcion, int *contador_blinks)
+{
+    if (led_tocado != ERROR)
+    {
+        
+        
+        (info_leds) -> letra = D;
+        (info_leds) -> bit = led_tocado;
+        (*funcion) = VACIO;
+        
+        proceso(info_leds, funcion, puertoD, contador_blinks);
+        
+     }
+}
 
 
 

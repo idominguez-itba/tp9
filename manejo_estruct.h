@@ -52,7 +52,7 @@ typedef struct
 }info_t;
 
 
-
+void actualizar_puerto (info_t *info_leds, dos_byte_t *puertoD, int led_tocado, int *funcion, int *contador_blinks);
 
 char bitGet (uint16_t bit, dos_byte_t puertoD, char puertoN);
 
@@ -62,8 +62,48 @@ char bitGet (uint16_t bit, dos_byte_t puertoD, char puertoN);
 //el puerto principal al cual pertence dicho puerto que se quiere obtener el bit.
 //Devuelve 1 si el bit estaba en 1, y devuelve un 0 si el bit esta en 0
 
+/////teclado
+
+info_t analizo_cambio(int tecla, info_t info);
+dos_byte_t dibujo_leds(info_t info, dos_byte_t puertoD);
+info_t limpio_info();
+void blink_leds(dos_byte_t puertoD, ALLEGRO_DISPLAY * display , ALLEGRO_BITMAP * led_apagado, ALLEGRO_BITMAP * led_prendido, ALLEGRO_BITMAP * fondo);
 
 
+
+
+///////////
+dos_byte_t maskSwitch(uint16_t mascara, dos_byte_t puertoD, info_t info);
+
+// Funcion maskOff: recibe una mascara de dos bytes, una estructura de un puertoD y un char con el puerto con el que se va a trabajar.
+// con esta informacion llama a maskSwitch cpn la info necesaria para que se apaguen todos los bits de la mascara. Devuelve como
+// parametro la estructura modificada del puertoD.
+
+dos_byte_t maskOff(uint16_t mascara, dos_byte_t puertoD, char puertoN);
+
+// Funcion maskOff: recibe una mascara de dos bytes, una estructura de un puertoD y un char con el puerto con el que se va a trabajar.
+// con esta informacion llama a maskSwitch cpn la info necesaria para que se prendan todos los bits de la mascara. Devuelve como
+// parametro la estructura modificada del puertoD.
+
+dos_byte_t maskOn(uint16_t mascara, dos_byte_t puertoD, char puertoN);
+
+// Funcion bitClear: recibe int del 0 al 15, una estructura de un puertoD y un char con el puerto con el que se va a trabajar.
+// con esta informacion llama a bitModif con la info necesaria para que se apague el bit seleccionado. Devuelve como
+// parametro la estructura modificada del puertoD.
+
+dos_byte_t bitClear (uint16_t bit, dos_byte_t puertoD, char puertoN);
+
+// Funcion bitGet: recibe int del 0 al 15, una estructura de un puertoD y un char con el puerto con el que se va a trabajar.
+// con esta informacion llama a bitModif con la info necesaria para que se prenda el bit seleccionado. Devuelve como
+// parametro la estructura modificada del puertoD.
+
+dos_byte_t bitSet (uint16_t bit, dos_byte_t puertoD, char puertoN);
+
+// Funcion bitModif: recibe int del 0 al 15, una estructura de un puertoD, un char con el puerto con el que se va a trabajar
+// y el modo en el que se quiere trabajar (set o clear). Con esta informacion crea una mascara acorde a lo pedido y llama a
+// maskOff o maskOn dependiendo de la situacion.
+
+dos_byte_t bitModif(uint16_t bit, dos_byte_t puertoD, char puertoN, char modo);
 
 #endif /* MANEJO_ESTRUCT_H */
 

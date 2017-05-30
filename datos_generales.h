@@ -28,6 +28,12 @@
 
 #define APAGADO "red"
 #define PRENDIDO "green"
+#define COLOR1 "blue"
+#define COLOR2 "yellow"
+
+#define FPS 60.0
+
+#define ERROR -1   //debe ser un numero negativo
 
 
 #endif /* DATOS_GENERALES_H */
