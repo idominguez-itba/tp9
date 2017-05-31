@@ -259,25 +259,26 @@ int main(int argc, char** argv) {
  
 	if(redibujar && al_is_event_queue_empty(maneja_evento)) 
 	{
+            flag_dibujo = 0;
             
             redibujar = false;
             
           
-          //  while (flag_dibujo == 0)
-            //{
+             while (flag_dibujo == 0)
+            {
                cambiar_estado_leds(display, led_apagado, led_prendido, puertoD, fondo);
                al_flip_display(); 
                
-             //  if (contador_blinks > 0) //esto significa que el blink esta activado
-             //  {
-              //     proceso(&info_leds, &funcion, &puertoD, &contador_blinks); //actualizo estructuras
-             //  }
-             //  else
-             //  {
-              //     flag_dibujo = 1;           ////ALGO ASI ES LA IDEA PERO NO FUNCIONA
-              // }
-           // }
-#warning guarda guarda main linea 280
+               if (contador_blinks > 0) //esto significa que el blink esta activado
+               {
+                   proceso(&info_leds, &funcion, &puertoD, &contador_blinks); //actualizo estructuras
+               }
+               else
+               {
+                   flag_dibujo = 1;           ////ALGO ASI ES LA IDEA PERO NO FUNCIONA
+               }
+            }
+
             
 	}
 	  
