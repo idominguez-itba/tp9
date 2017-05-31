@@ -16,6 +16,10 @@
 
 #include "manejo_estruct.h"
 
+void blink_leds(dos_byte_t puertoD, ALLEGRO_DISPLAY * display ,
+        ALLEGRO_BITMAP * led_apagado, ALLEGRO_BITMAP * led_prendido, ALLEGRO_BITMAP * fondo);
+
+
 
 void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado, 
         ALLEGRO_BITMAP * led_prendido, dos_byte_t datos, ALLEGRO_BITMAP * fondo);

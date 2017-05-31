@@ -67,7 +67,7 @@ char bitGet (uint16_t bit, dos_byte_t puertoD, char puertoN);
 info_t analizo_cambio(int tecla, info_t info);
 dos_byte_t dibujo_leds(info_t info, dos_byte_t puertoD);
 info_t limpio_info();
-void blink_leds(dos_byte_t puertoD, ALLEGRO_DISPLAY * display , ALLEGRO_BITMAP * led_apagado, ALLEGRO_BITMAP * led_prendido, ALLEGRO_BITMAP * fondo);
+
 
 
 

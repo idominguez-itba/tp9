@@ -125,7 +125,6 @@ int main(int argc, char** argv) {
    if(!maneja_evento)  //verifico que se haya creado correctamente la EVENT_QUEUE
    {
        al_destroy_event_queue(maneja_evento);
-       al_shutdown_primitives_addon();
        al_destroy_timer(timer);
        return -1;
         
@@ -139,7 +138,6 @@ int main(int argc, char** argv) {
    {
        al_destroy_bitmap(fondo);
        al_destroy_event_queue(maneja_evento);
-       al_shutdown_primitives_addon();
        al_destroy_timer(timer);
        
        return -1;
@@ -159,7 +157,6 @@ int main(int argc, char** argv) {
       
        al_destroy_bitmap(fondo);
        
-       al_shutdown_primitives_addon();
        al_destroy_timer(timer);
        
        return -1;
@@ -181,7 +178,6 @@ int main(int argc, char** argv) {
    
        al_destroy_bitmap(fondo);
        
-       al_shutdown_primitives_addon();
        al_destroy_timer(timer);
        
        return -1;
@@ -233,7 +229,7 @@ int main(int argc, char** argv) {
                 {   
                      caps_lock = !caps_lock;
                 }
-                else if((ALLEGRO_KEY_B)&&(caps_lock)&&(info_leds.letra!=0))
+                else if((tecla == ALLEGRO_KEY_B)&&(caps_lock)&&(info_leds.letra!=0))
                 {
                        blink_leds(puertoD, display , led_apagado, led_prendido, fondo);
                 }
@@ -370,7 +366,6 @@ int main(int argc, char** argv) {
      al_destroy_bitmap(led_prendido);  
      al_destroy_event_queue(maneja_evento);
      al_destroy_bitmap(fondo);
-     al_shutdown_primitives_addon();
      al_destroy_timer(timer);
      al_destroy_display(display);
          
@@ -452,4 +447,9 @@ void blink_leds(dos_byte_t puertoD, ALLEGRO_DISPLAY * display , ALLEGRO_BITMAP *
     
 }
     
+
+
+
+
+
 
