@@ -1,46 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/* 
- * File:   main.c
- * Author: ignacio
- *
- * Created on 26 de mayo de 2017, 18:08
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <allegro5/events.h>
-#include <allegro5/alcompat.h>
-#include <allegro5/system.h>
-#include <allegro5/keyboard.h>
-#include <allegro5/mouse.h>
-#include <allegro5/bitmap.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/display.h>
-#include <allegro5/drawing.h>
-#include <allegro5/allegro_color.h>
-#include <stdbool.h>
-
-#include "datos_generales.h"
-#include "manejo_led.h"
-#include "manejo_estruct.h"
 
 
 
 
-#warning primitivas no se usan (image_addon)
+#include "datos_generales.h"
+#include "manejo_led.h"
+#include "manejo_audio.h"
 
 
-//////////
-#define ALLEGRO_TO_DEC (9-(ALLEGRO_KEY_9 - tecla))
+
+
+
+
+
 
 #define SET 0
 #define CLEAR 1
-#define NOT_VALID (((tecla > ALLEGRO_KEY_9)&&(tecla < ALLEGRO_KEY_0))&&(tecla != ALLEGRO_KEY_A)&&(tecla != ALLEGRO_KEY_B)&&(tecla != ALLEGRO_KEY_D)&&(tecla != ALLEGRO_KEY_S)&&(tecla != ALLEGRO_KEY_C))
 
 
 
@@ -53,9 +28,15 @@ int main(int argc, char** argv) {
     //ALLEGRO
     ALLEGRO_DISPLAY * display = NULL;
     ALLEGRO_EVENT_QUEUE * maneja_evento = NULL;
-    ALLEGRO_BITMAP * led_prendido = NULL;                                   //LEDS
+    ALLEGRO_BITMAP * led_prendido = NULL;                                   
     ALLEGRO_BITMAP * led_apagado = NULL;
     ALLEGRO_BITMAP * fondo = NULL;
+    ALLEGRO_BITMAP * fondo1 = NULL;
+    ALLEGRO_BITMAP * auxiliar = NULL;
+    ALLEGRO_SAMPLE *aud_fondo = NULL;
+    ALLEGRO_SAMPLE_ID *id_aud_fondo = NULL;
+    ALLEGRO_SAMPLE *aud_r2d2 = NULL;
+    ALLEGRO_SAMPLE *aud_sable = NULL;
     ALLEGRO_TIMER *timer = NULL;
     
     //booleans
@@ -63,18 +44,22 @@ int main(int argc, char** argv) {
     bool redibujar = false;
     bool salir = false;
     bool cambiar_fondo = false;
+    bool cambiar_led = false;
+    
     
     bool caps_lock = false;     //para el teclado
    
     //enteros
     int contador_bitmap;    //para el cambio de fondo
-    int led_tocado;     //para el mouse
+    int led_tocado = 0;     //para el mouse. (lo inicializo distinto de ERROR, sabiendo que ERROR es un entero negativo)
     int contador_blinks = 0;    //para la funcion blink ingresada por teclado
     
     int funcion;        //para las funciones ingresadas por teclado
     int tecla;  //para el teclado
     
-    int flag_dibujo = 0;
+    int flag_dibujo = 0;   //para seguir dibujando cuando hay blinks
+    
+    
     
     
     
@@ -113,11 +98,69 @@ int main(int argc, char** argv) {
 	return -1;
     }
     
+   if(!al_install_audio())
+   {
+       printf("Fallo al instalar audio\n");
+       return -1;
+   }
+    
+   if(!al_init_acodec_addon())
+   {
+       printf("Fallo al inicializar Acodec\n");
+       return -1;
+   }
+    
+   if(!al_reserve_samples(CANT_AUDIOS))
+   {
+       printf("Fallo al reservar los samples de audio\n");
+       return -1;
+   }
+    
    if(!al_init_image_addon())                       //IMAGE_ADDON
    {
        printf("Fallo al inicializar primitivas\n");
        al_destroy_timer(timer);
        return -1;
+   }
+    
+    aud_fondo = al_load_sample("marcha.wav");
+  
+    
+   if(!(aud_fondo))
+   {
+        al_destroy_sample(aud_fondo);
+        al_destroy_timer(timer);
+       
+        
+        printf("Fallo al cargar los audios\n");
+        return -1;
+    }
+  
+   aud_r2d2 = al_load_sample("r2d2.wav");
+   
+   if(!(aud_r2d2))
+   {
+      al_destroy_sample(aud_fondo);
+      al_destroy_sample(aud_r2d2);
+      al_destroy_timer(timer);
+      
+      printf("Fallo al cargar los audios\n");
+      return -1;
+   }
+   
+   aud_sable = al_load_sample("sable.wav");
+   
+   
+   if(!(aud_sable))
+   {
+      al_destroy_sample(aud_fondo);
+      al_destroy_sample(aud_r2d2);
+      al_destroy_sample(aud_sable);
+      al_destroy_timer(timer);
+       
+      printf("Fallo al cargar los audios\n");
+      return -1;
+       
    }
 
     
@@ -128,55 +171,133 @@ int main(int argc, char** argv) {
    if(!maneja_evento)  //verifico que se haya creado correctamente la EVENT_QUEUE
    {
        al_destroy_event_queue(maneja_evento);
-       al_shutdown_primitives_addon();
+       al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
        al_destroy_timer(timer);
        return -1;
         
    }
  
-                                  //FONDO
-   
-   fondo = al_create_bitmap(ANCHO_DIS,ALTO_DIS);
+  fondo = al_load_bitmap("halcon.jpg");
    
    if(!fondo)
    {
+       
+       al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
+       
        al_destroy_bitmap(fondo);
        al_destroy_event_queue(maneja_evento);
-       al_shutdown_primitives_addon();
+       
        al_destroy_timer(timer);
        
        return -1;
    }
    
+   fondo1 = al_load_bitmap("estrella.jpg");
+   
+   if(!fondo1)
+   {
+       al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
+       
+       al_destroy_bitmap(fondo);
+       al_destroy_bitmap(fondo1);
+       
+       al_destroy_event_queue(maneja_evento);
+       
+       al_destroy_timer(timer);
+       return -1;
+   }
    
    
-   led_prendido = al_create_bitmap(ANCHO_LED,ALTO_LED);
-   led_apagado = al_create_bitmap(ANCHO_LED,ALTO_LED);
+   auxiliar = fondo;
    
-   if(!led_apagado&&!led_prendido)
-   {       
+   if(!auxiliar)
+   {
+      al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
+       
+       al_destroy_bitmap(fondo);
+       al_destroy_bitmap(fondo1);
+       al_destroy_bitmap(auxiliar);
+       al_destroy_event_queue(maneja_evento);
+       
+       al_destroy_timer(timer);
+       return -1;  
+   }
+   
+   led_apagado = al_load_bitmap("storm.png");
+   
+   if(!led_apagado)
+   {   
+       al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
+       al_destroy_bitmap(auxiliar);
+       al_destroy_bitmap(fondo1);
        al_destroy_event_queue(maneja_evento);
         
+       al_destroy_bitmap(led_apagado);
+       
+      
+       al_destroy_bitmap(fondo);
+       
+       
+       al_destroy_timer(timer);
+       
+       printf("falla");
+       
+       return -1;
+       
+       
+   }
+   
+   led_prendido = al_load_bitmap("chubi.png");
+   
+   
+   if(!led_prendido)
+   {
+          
+       al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
+       
+       al_destroy_bitmap(fondo1);
+       al_destroy_event_queue(maneja_evento);
+       al_destroy_bitmap(auxiliar); 
        al_destroy_bitmap(led_apagado);
        al_destroy_bitmap(led_prendido);
       
        al_destroy_bitmap(fondo);
        
-       al_shutdown_primitives_addon();
+       
        al_destroy_timer(timer);
+       
+       
        
        return -1;
        
        
+   
    }
-  
+   
                                                //DISPLAY
    display = al_create_display(ANCHO_DIS,ALTO_DIS); //creo el display
    
    if (!display)    //verifico que se haya creado correctamente el display
    {
        printf("Fallo al inicializar display");
-        
+       al_destroy_bitmap(fondo1);
+       al_destroy_sample(aud_fondo);
+       al_destroy_sample(aud_r2d2);
+       al_destroy_sample(aud_sable);
+       
+       al_destroy_bitmap(auxiliar);
        al_destroy_bitmap(led_apagado);
        al_destroy_bitmap(led_prendido);  
        
@@ -184,8 +305,9 @@ int main(int argc, char** argv) {
    
        al_destroy_bitmap(fondo);
        
-       al_shutdown_primitives_addon();
        al_destroy_timer(timer);
+       
+       
        
        return -1;
        
@@ -193,9 +315,7 @@ int main(int argc, char** argv) {
    }
 
    
-   al_set_target_bitmap(fondo);
-   al_clear_to_color(al_color_name(COLOR1));
-   al_set_target_bitmap(al_get_backbuffer(display));
+   
    
    al_register_event_source(maneja_evento, al_get_display_event_source(display));
    al_register_event_source(maneja_evento, al_get_timer_event_source(timer));
@@ -204,7 +324,9 @@ int main(int argc, char** argv) {
    
    al_start_timer(timer);   //aquí arranca el timer
    
-   while(!salir)                                        //hasta que se cierre la ventana
+    id_aud_fondo = reproducir_aud_fondo(aud_fondo);
+   
+     while(!salir)                                        //hasta que se cierre la ventana
    {
         ALLEGRO_EVENT ev;
 	if( al_get_next_event(maneja_evento, &ev) )     //levanto un evento
@@ -222,25 +344,34 @@ int main(int argc, char** argv) {
             {
 		led_tocado = identificar_led(ev.mouse.x, ev.mouse.y);   
                 actualizar_puerto(&info_leds, &puertoD, led_tocado, &funcion, &contador_blinks);
-                if (led_tocado == ERROR)
+                
+                if(led_tocado != ERROR)
                 {
-                    cambiar_fondo = true;
+                    cambiar_led = true;
+                } else
+                {
+                    auxiliar = fondo;
+                    fondo = fondo1;
+                    fondo1 = auxiliar;
+                    
                 }
+                
+               
                 
             }
           ///////////////TECLADO 
             else if(ev.type == ALLEGRO_EVENT_KEY_CHAR) //
             {
                 tecla = ev.keyboard.keycode;
-                if (!NOT_VALID)
-                {
-                    manejo_teclado_led(tecla, &info_leds, &funcion, &puertoD, &contador_blinks);
+                
+                
+                    cambiar_led = manejo_teclado_led(tecla, &info_leds, &funcion, &puertoD, &contador_blinks);
                 
                     
-                       // proceso(&info_leds, &funcion, &puertoD, &contador_blinks);
+                     
                     
                     
-                }
+                
                 
                 
                 
@@ -269,9 +400,18 @@ int main(int argc, char** argv) {
                cambiar_estado_leds(display, led_apagado, led_prendido, puertoD, fondo);
                al_flip_display(); 
                
+               if(cambiar_led == true)
+               {
+                   reproducir_audio(aud_r2d2);
+                   cambiar_led = false;
+               }
+               
                if (contador_blinks > 0) //esto significa que el blink esta activado
                {
                    proceso(&info_leds, &funcion, &puertoD, &contador_blinks); //actualizo estructuras
+                   
+                   reproducir_audio(aud_sable);
+                   
                }
                else
                {
@@ -283,95 +423,34 @@ int main(int argc, char** argv) {
 	}
 	  
     }
+                                                //detengo la musica de fondo
    
-   
-
-
-
-
-
-   /////////////////////////////////////////////////////////////////
-  /* cambiar_estado_leds(display, led_apagado, led_prendido, puertoD, fondo);
-
+     al_stop_sample(id_aud_fondo);
      
-   al_flip_display();
-   
- 
    
    
-   al_flip_display();
    
-   //registro los eventos
-  
+   
    
   
-   
-   al_rest(2.5);
-   
-   puertoD.puertoA=0x00;
-   puertoD.puertoB=0x01;
-   
-   
-   al_set_target_bitmap(fondo);
-   al_clear_to_color(al_color_name("yellow"));
-   al_set_target_bitmap(al_get_backbuffer(display));
-   
-   
-   cambiar_estado_leds(display, led_apagado, led_prendido,  puertoD, fondo);
-   al_flip_display();
-   al_rest(2.5);
-   
-   
-   
-   al_set_target_bitmap(fondo);
-   al_clear_to_color(al_color_name("white"));
-   al_set_target_bitmap(al_get_backbuffer(display));
-  
-   cambiar_estado_leds(display, led_apagado, led_prendido,  puertoD, fondo);
-   al_flip_display();
-   al_rest(2.5); 
-   
-   puertoD.puertoA = 0x10;
-   puertoD.puertoB = 0x0A;
-   
-   
-   al_set_target_bitmap(fondo);
-   al_clear_to_color(al_color_name("purple"));
-   al_set_target_bitmap(al_get_backbuffer(display));
-   
-   cambiar_estado_leds(display, led_apagado,led_prendido, puertoD, fondo);
-   al_flip_display();
-   al_rest(2.5);
-   
-   puertoD.puertoA = 0x0B;
-   puertoD.puertoB = 0xF2;
-   
-   
-   al_set_target_bitmap(fondo);
-   al_clear_to_color(al_color_name("brown"));
-   al_set_target_bitmap(al_get_backbuffer(display));
-   
-   cambiar_estado_leds(display, led_apagado, led_prendido, puertoD, fondo);
-   al_flip_display();
-   al_rest(2.5);*/
-   
-   
+    
                                                                     //destruyo todo lo que cree 
      al_destroy_bitmap(led_apagado);
      al_destroy_bitmap(led_prendido);  
      al_destroy_event_queue(maneja_evento);
      al_destroy_bitmap(fondo);
-     al_shutdown_primitives_addon();
+     al_destroy_bitmap(fondo1);
+     al_destroy_bitmap(auxiliar);
      al_destroy_timer(timer);
      al_destroy_display(display);
-         
+     
+     al_destroy_sample(aud_fondo);
+     al_destroy_sample(aud_r2d2);
+     al_destroy_sample(aud_sable);
+     
+     al_uninstall_audio();
+     al_uninstall_keyboard();
+     al_uninstall_mouse();
+       
     return (EXIT_SUCCESS);
 }
-
-
-
-////TECLADO
-
-
-    
-

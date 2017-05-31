@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>backend.h</itemPath>
       <itemPath>datos_generales.h</itemPath>
+      <itemPath>manejo_audio.h</itemPath>
       <itemPath>manejo_estruct.h</itemPath>
       <itemPath>manejo_led.h</itemPath>
     </logicalFolder>
@@ -18,6 +19,7 @@
                    projectFiles="true">
       <itemPath>backend.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>manejo_audio.c</itemPath>
       <itemPath>manejo_led.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -68,6 +70,10 @@
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
+      <item path="manejo_audio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="manejo_audio.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="manejo_estruct.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="manejo_led.c" ex="false" tool="0" flavor2="0">
@@ -102,6 +108,10 @@
       <item path="datos_generales.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="manejo_audio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="manejo_audio.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="manejo_estruct.h" ex="false" tool="3" flavor2="0">
       </item>

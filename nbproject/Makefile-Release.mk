@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/backend.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/manejo_audio.o \
 	${OBJECTDIR}/manejo_led.o
 
 
@@ -73,6 +74,11 @@ ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.c
+
+${OBJECTDIR}/manejo_audio.o: manejo_audio.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/manejo_audio.o manejo_audio.c
 
 ${OBJECTDIR}/manejo_led.o: manejo_led.c
 	${MKDIR} -p ${OBJECTDIR}

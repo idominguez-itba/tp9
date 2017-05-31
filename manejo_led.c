@@ -1,27 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-#include <allegro5/allegro.h>
-#include <allegro5/bitmap.h>
-#include <allegro5/keyboard.h>
-#include <allegro5/allegro_color.h>
 
-#include <stdbool.h>
+
+
+
 
 #include "datos_generales.h"
 #include "manejo_led.h"
-#include "manejo_estruct.h"
-
-
-#define SEPA_ENTRE_LEDS 10
-#define SEPA_PUERTOS_AUX 50
 
 
 
-#define MAYUSC 'M'
+
+
+#define BASE_NUM 10
+#define PPIO 0.0
 
 #define NOT_VALID (((tecla > ALLEGRO_KEY_9)&&(tecla < ALLEGRO_KEY_0))&&(tecla != ALLEGRO_KEY_A)&&(tecla != ALLEGRO_KEY_B)&&(tecla != ALLEGRO_KEY_D)&&(tecla != ALLEGRO_KEY_S)&&(tecla != ALLEGRO_KEY_C))
 
@@ -29,7 +20,8 @@
 //PROTOTIPOS//
 
 int al2num(int tecla, int allegro_keys[BASE_NUM]);
-
+//recibe un ALLEGRO_KEY entre ALLEGRO_KEY_0 y ALLEGRO_KEY_9 y recibe un arreglo de estos ALLEGRO_KEYs
+//devuelve el ALLEGRO_KEY convertido en entero decimal (entre cero y nueve)
 
 float calc_posx_led (int nro_led, int tamano_puerto);
 
@@ -87,14 +79,16 @@ void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado
     int cont_puerto;
     int cont_leds;
      
-    al_set_target_bitmap(led_prendido);
-    al_clear_to_color(al_color_name(PRENDIDO));
-    
-    al_set_target_bitmap(led_apagado);
-    al_clear_to_color(al_color_name(APAGADO));
+    float led_prendido_w = al_get_bitmap_width(led_prendido);
+    float led_prendido_h = al_get_bitmap_height(led_prendido);
+    float led_apagado_w = al_get_bitmap_width(led_apagado);
+    float led_apagado_h = al_get_bitmap_height(led_apagado);
+    float fondo_w = al_get_bitmap_width(fondo);
+    float fondo_h = al_get_bitmap_height(fondo);
     
     al_set_target_backbuffer(display);
-    al_draw_bitmap(fondo,0,0,0);     
+    
+    al_draw_scaled_bitmap(fondo,PPIO,PPIO,fondo_w,fondo_h,PPIO,PPIO,ANCHO_DIS,ALTO_DIS,0);
     
     for(cont_puerto=0;cont_puerto<CANT_PUERTOS_AUX;cont_puerto++)
     {
@@ -106,10 +100,12 @@ void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado
                     
             if(estado == ON)
             {
-                al_draw_bitmap(led_prendido,posx,posy,0);
+                al_draw_scaled_bitmap(led_prendido,PPIO,PPIO,led_prendido_w,led_prendido_h,posx,posy
+                        ,ANCHO_LED,ALTO_LED,0);
             } else
             {
-                al_draw_bitmap(led_apagado,posx,posy,0);
+                al_draw_scaled_bitmap(led_apagado,PPIO,PPIO,led_apagado_w,led_apagado_h,posx,posy
+                        ,ANCHO_LED,ALTO_LED,0);
             }
                    
         }
@@ -117,6 +113,8 @@ void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado
             
           
 }
+        
+
         
 
 float calc_posx_led (int nro_led, int tamano_puerto)
@@ -161,7 +159,7 @@ float calc_posy_led (int nro_puerto_aux, int tamano_puerto)
     return posy;
 }
 
-void manejo_teclado_led(int tecla, info_t *info_leds, int *p_funcion, dos_byte_t *puertoD, int *contador_blinks) 
+bool manejo_teclado_led(int tecla, info_t *info_leds, int *p_funcion, dos_byte_t *puertoD, int *contador_blinks) 
 {
     int allegro_keys[BASE_NUM] = {ALLEGRO_KEY_0, ALLEGRO_KEY_1, ALLEGRO_KEY_2, ALLEGRO_KEY_3, ALLEGRO_KEY_4, ALLEGRO_KEY_5, ALLEGRO_KEY_6, ALLEGRO_KEY_7, ALLEGRO_KEY_8, ALLEGRO_KEY_9};
     static int contador_puertoD = 0;
@@ -254,6 +252,8 @@ void manejo_teclado_led(int tecla, info_t *info_leds, int *p_funcion, dos_byte_t
         proceso(info_leds, p_funcion, puertoD, contador_blinks);
     }
     
+    return procesar;
+    
 }
 
 
@@ -270,4 +270,6 @@ int al2num(int tecla, int allegro_keys[BASE_NUM])
     }
     
 }
+
+
                
