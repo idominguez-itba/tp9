@@ -64,10 +64,7 @@ char bitGet (uint16_t bit, dos_byte_t puertoD, char puertoN);
 
 /////teclado
 
-info_t analizo_cambio(int tecla, info_t info);
-dos_byte_t dibujo_leds(info_t info, dos_byte_t puertoD);
-info_t limpio_info();
-void blink_leds(dos_byte_t puertoD, ALLEGRO_DISPLAY * display , ALLEGRO_BITMAP * led_apagado, ALLEGRO_BITMAP * led_prendido, ALLEGRO_BITMAP * fondo);
+
 
 
 
@@ -104,6 +101,9 @@ dos_byte_t bitSet (uint16_t bit, dos_byte_t puertoD, char puertoN);
 // maskOff o maskOn dependiendo de la situacion.
 
 dos_byte_t bitModif(uint16_t bit, dos_byte_t puertoD, char puertoN, char modo);
+
+
+void proceso(info_t *info, int *p_funcion, dos_byte_t *puertoD, int *contador);
 
 #endif /* MANEJO_ESTRUCT_H */
 

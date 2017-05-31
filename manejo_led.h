@@ -14,6 +14,8 @@
 #ifndef MANEJO_LED_H
 #define MANEJO_LED_H
 
+#define BASE_NUM 10
+
 #include "manejo_estruct.h"
 
 
@@ -27,6 +29,11 @@ void cambiar_estado_leds (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP * led_apagado
 
 int identificar_led (float coordenada_x, float coordenada_y);
 // recibe como parámetro dos coordenadas y 
+
+
+
+void manejo_teclado_led(int tecla, info_t *info_leds, int *p_funcion, dos_byte_t *puertoD, int *contador);
+
 
 
 

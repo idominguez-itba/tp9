@@ -6,8 +6,10 @@
 
 #include <allegro5/allegro.h>
 #include <allegro5/bitmap.h>
-#include <stdbool.h>
+#include <allegro5/keyboard.h>
 #include <allegro5/allegro_color.h>
+
+#include <stdbool.h>
 
 #include "datos_generales.h"
 #include "manejo_led.h"
@@ -17,7 +19,16 @@
 #define SEPA_ENTRE_LEDS 10
 #define SEPA_PUERTOS_AUX 50
 
+
+
+#define MAYUSC 'M'
+
+#define NOT_VALID (((tecla > ALLEGRO_KEY_9)&&(tecla < ALLEGRO_KEY_0))&&(tecla != ALLEGRO_KEY_A)&&(tecla != ALLEGRO_KEY_B)&&(tecla != ALLEGRO_KEY_D)&&(tecla != ALLEGRO_KEY_S)&&(tecla != ALLEGRO_KEY_C))
+
+
 //PROTOTIPOS//
+
+int al2num(int tecla, int allegro_keys[BASE_NUM]);
 
 
 float calc_posx_led (int nro_led, int tamano_puerto);
@@ -150,3 +161,113 @@ float calc_posy_led (int nro_puerto_aux, int tamano_puerto)
     return posy;
 }
 
+void manejo_teclado_led(int tecla, info_t *info_leds, int *p_funcion, dos_byte_t *puertoD, int *contador_blinks) 
+{
+    int allegro_keys[BASE_NUM] = {ALLEGRO_KEY_0, ALLEGRO_KEY_1, ALLEGRO_KEY_2, ALLEGRO_KEY_3, ALLEGRO_KEY_4, ALLEGRO_KEY_5, ALLEGRO_KEY_6, ALLEGRO_KEY_7, ALLEGRO_KEY_8, ALLEGRO_KEY_9};
+    static int contador_puertoD = 0;
+    static int num_aux_puertoD;
+    static bool caps_lock = false;
+    bool procesar = false;
+    
+    (*p_funcion) = VACIO;
+    
+    
+    if (!NOT_VALID)
+    {
+        if (!caps_lock)
+        {
+            if ((tecla == ALLEGRO_KEY_A) || (tecla == ALLEGRO_KEY_B) || (tecla == ALLEGRO_KEY_D)) // es puerto
+            {
+                switch (tecla)
+                {
+                    case ALLEGRO_KEY_A: info_leds -> letra = A; break;
+                    case ALLEGRO_KEY_B: info_leds -> letra = B; break;
+                    case ALLEGRO_KEY_D: info_leds -> letra = D; break;
+                }
+            }
+            
+            else if ((tecla >= ALLEGRO_KEY_0) && (tecla <= ALLEGRO_KEY_9)) //es numero
+            {
+                tecla = al2num(tecla, allegro_keys);          //obtengo el numero decimal entero
+                
+                if ((info_leds -> letra) != D)      //caso puerto D es especial
+                {
+                    info_leds -> bit = tecla;
+                    procesar = true;
+                }
+                
+                else        // analizo aparte el caso del puerto D
+                {
+                    if (contador_puertoD == 0)
+                    {
+                        num_aux_puertoD = tecla;
+                        contador_puertoD++;
+                    }
+                    else if (contador_puertoD == 1)
+                    {
+                        num_aux_puertoD *= BASE_NUM;
+                        tecla += num_aux_puertoD;
+                        num_aux_puertoD = 0;
+                        contador_puertoD--;
+                        
+                        if (tecla <= CANT_LEDS_D)       //solo modifico informacion si se ingresaron bien los datos
+                        {
+                            info_leds -> bit = tecla;
+                            procesar = true;
+                        }
+                    }
+                }
+             }
+            else if (tecla == ALLEGRO_KEY_TAB)
+            {
+                caps_lock = !caps_lock; 
+            }
+            
+        
+          }
+        
+        else        //esta actuando la mayuscula, se van a invocar funciones 
+        {
+            switch(tecla)
+            {
+                case ALLEGRO_KEY_S: (*p_funcion) = PRENDER_TODOS;
+                                    procesar = true; break;
+                case ALLEGRO_KEY_C: (*p_funcion) = APAGAR_TODOS;
+                                    procesar = true; break;
+                case ALLEGRO_KEY_B: (*p_funcion) = PARPADEAR_PRENDIDOS; 
+                                    procesar = true; break;
+                
+            }
+            
+            if (tecla == ALLEGRO_KEY_TAB)
+            {
+                caps_lock = !caps_lock; 
+            }
+            
+            
+        }
+   
+      }
+    
+    if (procesar)
+    {
+        proceso(info_leds, p_funcion, puertoD, contador_blinks);
+    }
+    
+}
+
+
+int al2num(int tecla, int allegro_keys[BASE_NUM])
+{
+    int i;
+    for (i = 0; i < BASE_NUM; i++)
+    {
+        if (tecla == allegro_keys[i])
+        {
+            tecla = i;
+            i = BASE_NUM;  //se fuerza el break del for
+        }
+    }
+    
+}
+               
